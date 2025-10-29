@@ -1,4 +1,16 @@
-# ./logging_config.py
+"""Logging configuration helper.
+
+This module provides a small helper `setup_logger` that configures a
+root logger with a console handler and a file handler. It is intended for
+simple scripts and small projects that need consistent logging output.
+
+Usage:
+    from logging_config import setup_logger
+    logger = setup_logger(log_level=logging.INFO, log_file='./logs/app.log')
+    logger.info('Started')
+
+The `setup_logger` function returns the configured root logger object.
+"""
 
 import logging
 import os
@@ -23,11 +35,11 @@ def setup_logger(log_level=logging.DEBUG, log_file="./logs/app.log"):
     log_format = "%(asctime)s - %(levelname)s - %(module)s - %(message)s"
 
     # 设置日志级别
-    logger = logging.getLogger()
-    logger.setLevel(log_level)
+    log = logging.getLogger()
+    log.setLevel(log_level)
 
     # 避免重复添加处理器
-    if not logger.handlers:
+    if not log.handlers:
         # 控制台日志处理器
         console_handler = logging.StreamHandler()
         console_handler.setFormatter(logging.Formatter(log_format))
@@ -37,19 +49,19 @@ def setup_logger(log_level=logging.DEBUG, log_file="./logs/app.log"):
         file_handler.setFormatter(logging.Formatter(log_format))
 
         # 添加处理器
-        logger.addHandler(console_handler)
-        logger.addHandler(file_handler)
+        log.addHandler(console_handler)
+        log.addHandler(file_handler)
 
-    return logger
+    return log
 
 
 # 单独运行时的测试代码
 if __name__ == "__main__":
-    # 示例日志文件路径
-    log_file_path = "./logs/test_logger.log"
+    # 示例日志文件路径（常量风格）
+    LOG_FILE_PATH = "./logs/test_logger.log"
 
     # 初始化日志记录器
-    logger = setup_logger(log_level=logging.INFO, log_file=log_file_path)
+    logger = setup_logger(log_level=logging.INFO, log_file=LOG_FILE_PATH)
 
     # 测试日志输出
     logger.debug("This is a DEBUG message.")

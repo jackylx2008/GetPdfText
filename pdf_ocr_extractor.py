@@ -147,7 +147,10 @@ def main(config):
     log_file = config.get("log_file")
     if log_file:
         # 重新初始化 logger handler（简单做法：覆盖模块级 logger）
-        globals()["logger"] = setup_logger(log_level=logging.DEBUG, log_file=log_file)
+        globals()["logger"] = setup_logger(
+            log_level=logging.DEBUG,
+            log_file=log_file,
+        )
 
     pdf_directory = config["pdf_directory"]
     output_directory = config.get("output_directory", "./output")
