@@ -82,6 +82,9 @@ def find_and_copy_pdfs(target_dirs, match_strings, output_dir, logger):
 
 
 def main():
+    """
+    根据配置文件复制匹配的PDF文件。
+    """
     # 设置日志记录
     logger = setup_logger(log_file="./logs/copy_pdf_by_name.log")
 
