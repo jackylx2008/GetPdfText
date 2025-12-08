@@ -49,7 +49,10 @@ class PdfOcrExtractor:
             self.logger.info(
                 "开始将PDF文件 %s 转换为图像(从第%d页开始)...", pdf_path, start_page
             )
-            images = convert_from_path(pdf_path, dpi=self.dpi, first_page=start_page)
+            # thread_count=1: 确保每个转换进程只使用一个线程，避免在多进程环境下过度竞争 CPU
+            images = convert_from_path(
+                pdf_path, dpi=self.dpi, first_page=start_page, thread_count=1
+            )
             self.logger.info("PDF文件 %s 成功转换为 %d 张图像。", pdf_path, len(images))
             return images
         except Exception as exc:

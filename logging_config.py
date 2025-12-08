@@ -20,12 +20,13 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 
-def setup_logger(log_level=logging.DEBUG, log_file="./logs/app.log"):
+def setup_logger(log_level=logging.DEBUG, log_file="./logs/app.log", mode="a"):
     """
     设置日志记录器。
 
     :param log_level: 日志级别，默认为 DEBUG。
     :param log_file: 日志文件路径，默认为 ./logs/app.log。
+    :param mode: 文件打开模式，默认为 'a' (追加)。使用 'w' 可覆盖。
     :return: 配置好的日志记录器。
     """
     # 创建日志文件夹
@@ -45,7 +46,7 @@ def setup_logger(log_level=logging.DEBUG, log_file="./logs/app.log"):
         console_handler.setFormatter(logging.Formatter(log_format))
 
         # 文件日志处理器
-        file_handler = logging.FileHandler(log_file)
+        file_handler = logging.FileHandler(log_file, mode=mode, encoding="utf-8")
         file_handler.setFormatter(logging.Formatter(log_format))
 
         # 添加处理器

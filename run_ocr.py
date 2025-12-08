@@ -9,6 +9,7 @@ import argparse
 import yaml
 import logging
 import csv
+import concurrent.futures
 from logging_config import setup_logger
 from pdf_ocr_extractor import PdfOcrExtractor
 
@@ -18,6 +19,25 @@ def load_config(config_path="./config.yaml"):
     with open(config_path, "r", encoding="utf-8") as f:
         conf = yaml.safe_load(f)
     return conf
+
+
+def process_pdf_wrapper(args):
+    """
+    并行处理的包装函数。
+
+    :param args: 元组 (pdf_path, config)
+    :return: (matches, error_message)
+    """
+    pdf_path, config = args
+    try:
+        # 在子进程中初始化提取器
+        # 注意：这里不传递主进程的 logger，避免 pickle 问题
+        # 提取器会使用默认的 logger，可能会输出到控制台
+        extractor = PdfOcrExtractor(config)
+        matches = extractor.extract_matches_from_pdf(pdf_path)
+        return matches, None
+    except Exception as e:
+        return None, str(e)
 
 
 def main():
@@ -40,9 +60,6 @@ def main():
         log_file=log_file,
     )
 
-    # 初始化提取器
-    extractor = PdfOcrExtractor(config, logger)
-
     pdf_directory = config.get("pdf_directory")
     if not pdf_directory:
         logger.error("配置文件中未指定 pdf_directory")
@@ -54,19 +71,45 @@ def main():
 
     logger.info("开始处理目录 %s 中的所有PDF文件...", pdf_directory)
 
-    # 遍历目录处理 PDF
-    count = 0
+    # 收集所有 PDF 文件路径
+    pdf_files = [
+        os.path.join(pdf_directory, f)
+        for f in os.listdir(pdf_directory)
+        if f.lower().endswith(".pdf")
+    ]
+
+    total_files = len(pdf_files)
+    if total_files == 0:
+        logger.info("未找到 PDF 文件。")
+        return
+
+    logger.info("共找到 %d 个 PDF 文件，准备并行处理...", total_files)
+
     all_matches = []
-    for file_name in os.listdir(pdf_directory):
-        if file_name.lower().endswith(".pdf"):
-            pdf_path = os.path.join(pdf_directory, file_name)
+    count = 0
+
+    # 使用 ProcessPoolExecutor 进行并行处理
+    with concurrent.futures.ProcessPoolExecutor() as executor:
+        # 提交任务
+        future_to_pdf = {
+            executor.submit(process_pdf_wrapper, (pdf_path, config)): pdf_path
+            for pdf_path in pdf_files
+        }
+
+        for future in concurrent.futures.as_completed(future_to_pdf):
+            pdf_path = future_to_pdf[future]
+            file_name = os.path.basename(pdf_path)
             try:
-                matches = extractor.extract_matches_from_pdf(pdf_path)
-                if matches:
-                    all_matches.extend(matches)
-                count += 1
-            except Exception as e:
-                logger.error("处理文件 %s 时出错: %s", file_name, e)
+                matches, error = future.result()
+                if error:
+                    logger.error("处理文件 %s 时出错: %s", file_name, error)
+                else:
+                    if matches:
+                        all_matches.extend(matches)
+                    count += 1
+                    logger.info("已完成 (%d/%d): %s", count, total_files, file_name)
+            except Exception as exc:
+                logger.error("处理文件 %s 时发生未捕获异常: %s", file_name, exc)
 
     # 合并所有匹配结果
     if all_matches:
