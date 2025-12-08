@@ -114,12 +114,12 @@ def main():
     # 准备 unmatches.csv 和 skipped_errors.csv
     output_directory = config.get("output_directory", "./output")
     os.makedirs(output_directory, exist_ok=True)
-    unmatches_csv_path = os.path.join(output_directory, "unmatches.csv")
+    unmatch_csv_path = os.path.join(output_directory, "unmatches.csv")
     skipped_csv_path = os.path.join(output_directory, "skipped_errors.csv")
 
     # 初始化 CSV 文件
     try:
-        with open(unmatches_csv_path, "w", encoding="utf-8", newline="") as f:
+        with open(unmatch_csv_path, "w", encoding="utf-8", newline="") as f:
             writer = csv.writer(f)
             writer.writerow(["file_name", "filename_match", "ocr_matches"])
 
@@ -185,9 +185,7 @@ def main():
                 if not filename_match_str:
                     logger.warning("文件名 %s 不符合正则表达式规则", file_name)
                     # 如果文件名本身都不符合规则，记录为 mismatch
-                    with open(
-                        unmatches_csv_path, "a", encoding="utf-8", newline=""
-                    ) as f:
+                    with open(unmatch_csv_path, "a", encoding="utf-8", newline="") as f:
                         writer = csv.writer(f)
                         writer.writerow(
                             [file_name, "NO_MATCH_IN_FILENAME", str(matches)]
@@ -213,9 +211,7 @@ def main():
                     )
                     mismatch_count += 1
                     # 写入 unmatches.csv
-                    with open(
-                        unmatches_csv_path, "a", encoding="utf-8", newline=""
-                    ) as f:
+                    with open(unmatch_csv_path, "a", encoding="utf-8", newline="") as f:
                         writer = csv.writer(f)
                         writer.writerow([file_name, filename_match_str, str(matches)])
 
