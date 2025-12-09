@@ -222,6 +222,32 @@ def main():
 
     logger.info("验证完成。共处理 %d 个文件，发现 %d 个不匹配。", count, mismatch_count)
 
+    # 对结果文件进行排序
+    def sort_csv(file_path):
+        if not os.path.exists(file_path):
+            return
+        try:
+            with open(file_path, "r", encoding="utf-8", newline="") as f:
+                reader = csv.reader(f)
+                rows = list(reader)
+
+            if len(rows) > 1:
+                header = rows[0]
+                data = rows[1:]
+                # 按第一列 (file_name) 排序
+                data.sort(key=lambda x: x[0])
+
+                with open(file_path, "w", encoding="utf-8", newline="") as f:
+                    writer = csv.writer(f)
+                    writer.writerow(header)
+                    writer.writerows(data)
+                logger.info("已对文件进行排序: %s", file_path)
+        except Exception as e:
+            logger.error("排序文件 %s 时出错: %s", file_path, e)
+
+    sort_csv(unmatch_csv_path)
+    sort_csv(skipped_csv_path)
+
 
 if __name__ == "__main__":
     main()
