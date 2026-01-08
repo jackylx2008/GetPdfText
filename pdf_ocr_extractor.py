@@ -36,6 +36,8 @@ class PdfOcrExtractor:
         self.matches_csv = config.get("matches_csv")
         self.marker = config.get("marker", "设计变更通知单")
         self.auto_rotate = config.get("auto_rotate", False)  # 是否自动修正图像方向
+        # 新增：从配置中读取内容正则表达式（支持字符串或列表）
+        self.content_regex = config.get("content_regex")
 
         # 确保输出目录存在
         os.makedirs(self.output_directory, exist_ok=True)
@@ -224,3 +226,27 @@ class PdfOcrExtractor:
         except Exception as e:
             self.logger.error("处理 PDF %s 失败: %s", pdf_path, e)
             raise
+
+    def _extract_matches_by_regex(self, text_per_page, patterns, start_page=1):
+        """使用正则表达式列表在 OCR 结果中查找匹配行。"""
+        if isinstance(patterns, str):
+            patterns = [patterns]
+
+        matches = []
+        for i, page_text in enumerate(text_per_page):
+            if not page_text:
+                continue
+            for line in page_text.splitlines():
+                line = line.strip()
+                for pattern in patterns:
+                    if re.search(pattern, line):
+                        current_page = start_page + i
+                        self.logger.info(
+                            "第 %d 页 找到正则匹配 [%s]: %s",
+                            current_page,
+                            pattern,
+                            line,
+                        )
+                        matches.append((current_page, line))
+                        break  # 匹配到一个正则即可
+        return matches

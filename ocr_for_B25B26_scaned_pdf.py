@@ -1,7 +1,30 @@
 """
-运行 PDF OCR 提取器的脚本。
+ocr_for_B25B26_scaned_pdf.py
 
-此脚本加载配置，初始化 PdfOcrExtractor 类，并遍历指定目录处理 PDF 文件。
+功能说明：
+本脚本用于批量处理指定目录下的 PDF 文件，自动执行 OCR（光学字符识别）并根据配置文件提取匹配内容，最终将结果汇总输出为 CSV 文件。支持多进程并行处理，适合大批量 PDF 文档的自动化文本提取与结构化输出。
+
+主要功能：
+- 加载 YAML 配置文件，灵活指定 PDF 目录、输出路径、日志等参数
+- 自动遍历目录下所有 PDF 文件
+- 使用 PdfOcrExtractor 类对每个 PDF 进行 OCR 识别与内容匹配
+- 支持多进程并发处理，提高处理效率
+- 处理结果自动写入 CSV 文件，便于后续分析
+- 针对的具体工作是主体扫描的设计变更通知单的内容提取
+- 详细日志记录处理过程与异常信息
+
+
+使用方法：
+python run_ocr.py --config ./config_B25B26.yaml
+
+依赖项：
+- PyYAML
+- logging
+- concurrent.futures
+- PdfOcrExtractor 类（自定义模块）
+
+作者：xxx
+日期：2026-01-08
 """
 
 import os
@@ -14,7 +37,7 @@ from logging_config import setup_logger
 from pdf_ocr_extractor import PdfOcrExtractor
 
 
-def load_config(config_path="./config.yaml"):
+def load_config(config_path="./config_B25B26.yaml"):
     """从 YAML 配置文件加载配置并返回字典。"""
     with open(config_path, "r", encoding="utf-8") as f:
         conf = yaml.safe_load(f)
@@ -43,7 +66,7 @@ def process_pdf_wrapper(args):
 def main():
     parser = argparse.ArgumentParser(description="PDF OCR Extractor Runner")
     parser.add_argument(
-        "--config", type=str, default="./config.yaml", help="配置文件路径"
+        "--config", type=str, default="./config_B25B26.yaml", help="配置文件路径"
     )
     args = parser.parse_args()
 

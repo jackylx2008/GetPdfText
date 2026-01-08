@@ -12,9 +12,12 @@
 
 * `pdf_ocr_extractor.py`: 包含核心类 `PdfOcrExtractor`，封装了 PDF 转图、OCR 识别和文本提取逻辑。
 * `run_ocr.py`: 主运行脚本，加载配置并调用 `PdfOcrExtractor` 批量处理 PDF 文件。
-* `copy_pdf_by_name.py`: 工具脚本，根据 `file.txt` 中的文件名列表，从 `target_directories` 中查找并复制 PDF 文件。
+* `ocr_for_B24_scaned_pdf.py`: 专门针对 B24 地块扫描件的 OCR 提取脚本。
+* `ocr_for_B25B26_scaned_pdf.py`: 专门针对 B25B26 地块扫描件的 OCR 提取脚本。
+* `rename_pdf_by_ocr_result.py`: 工具脚本，根据 OCR 识别出的变更编号对 PDF 文件进行批量重命名。
 * `logging_config.py`: 日志配置模块。
-* `config.yaml`: 项目配置文件。
+* `config_B24.yaml`: B24 地块专用的配置文件。
+* `config_B25B26.yaml`: B25B26 地块专用的配置文件。
 
 ## 安装依赖
 
@@ -55,3 +58,16 @@ target_directories:            # copy_pdf_by_name.py 搜索的源目录列表
   - ./src/folder1
 file_txt: ./output/file.txt    # 包含要查找的文件名关键词的文本文件
 ```
+
+## 修改日志
+
+### 2026-01-08
+- **新增脚本** `rename_pdf_by_ocr_result.py`:
+  - 针对 B24 配套酒店独立 PDF 扫描文件进行变更编号的匹配。
+  - 读取 `output` 目录下的 CSV 识别结果，利用正则匹配截取“变更编号”并自动重命名 `src` 目录下的原 PDF 文件。
+  - 支持 YAML 配置文件的灵活动态加载及详细日志记录。
+- **更新文档**: 更新 `README.md`，添加项目结构说明及修改日志。
+
+### 2026-01-07
+- **优化 OCR 脚本**: 细化了针对 B24 及 B25B26 地块的 PDF 扫描件 OCR 处理逻辑。
+- **配置分离**: 创建了 `config_B24.yaml` 和 `config_B25B26.yaml` 以适应不同项目的正则表达式匹配需求。
